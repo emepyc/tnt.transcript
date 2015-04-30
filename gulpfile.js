@@ -46,7 +46,7 @@ gulp.task('test', function () {
 });
 
 gulp.task('watch', function() {
-    gulp.watch(['*.js','./src/**/*.js','./lib/**/*.js', './test/**/*.js'], ['build-browser', 'lint', 'test']);
+    gulp.watch(['*.js','./src/**/*.js','./src/scss/*.scss','./lib/**/*.js', './test/**/*.js'], ['build-browser', 'lint', 'test']);
 });
 
 
@@ -65,7 +65,9 @@ gulp.task('init', ['clean'], function() {
 // sass-import
 gulp.task('sass', function () {
     return gulp.src("index.scss")
-	.pipe(sass())
+	.pipe(sass({
+	    errLogToConsole: true
+	}))
 	.pipe(gulp.dest(buildDir));
 });
 
