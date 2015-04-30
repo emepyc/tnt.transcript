@@ -8,7 +8,7 @@ var transcriptViewerTheme = function () {
     // console.log(gene_url);
 
     var theme = function (tv, div) {
-	tv.gene("ENSG00000139618")
+	tv.gene("ENSG00000132963")
 	tv(div);
     };
 

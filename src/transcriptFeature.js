@@ -7,9 +7,6 @@ tnt_feature_transcript = function () {
 	data : undefined,
 	gene : undefined
     };
-
-
-    // var fgColor = 
     
     // NAME FEATURE
     var nameFeature = tnt_board.track.feature()
@@ -102,9 +99,11 @@ tnt_feature_transcript = function () {
 	    });
 	    ensemblRest.call(gene_url)
 		.then (function (resp) {
+		    console.log(resp);
 		    for (var i=0; i<resp.body.Transcript.length; i++) {
 			var t = resp.body.Transcript[i];
-			board.add_track(getTranscriptTrack (t.display_name, resp.body.strand, t.Exon));
+			var startCoord = t.start < t.end ? t.start : t.end
+			board.add_track(getTranscriptTrack (t.display_name, startCoord, resp.body.strand, t.Exon));
 		    }
 		    board.from(resp.body.start)
 			.to(resp.body.end)
@@ -118,26 +117,27 @@ tnt_feature_transcript = function () {
 	}
     };
 
-    function exonsToExonsAndIntrons (name, strand, exons) {
+    function exonsToExonsAndIntrons (name, startCoord, strand, exons) {
 	var obj = {};
 	obj.name = [{
-	    pos: exons[0].start,
+	    pos: startCoord,
 	    name: name,
 	    strand: strand
 	}];
 	obj.exons = exons;
 	obj.introns = [];
+	console.log(exons);
 	for (var i=0; i<exons.length-1; i++) {
 	    var intron = {
-		start : exons[i].end,
-		end   : exons[i+1].start
+		start : strand === 1 ? exons[i].end : exons[i].start,
+		end   : strand === 1 ? exons[i+1].start : exons[i+1].end
 	    };
 	    obj.introns.push(intron);
 	}
 	return obj;
     }
     
-    function getTranscriptTrack (name, strand, exons) {
+    function getTranscriptTrack (name, startCoord, strand, exons) {
 
 	var compositeFeature = tnt_board.track.feature.composite()
 	    .add ("exons", exonFeature)
@@ -150,7 +150,7 @@ tnt_feature_transcript = function () {
 	    .data(tnt_board.track.data()
 		  .update(tnt_board.track.data.retriever.sync()
 			  .retriever (function () {
-			      return exonsToExonsAndIntrons(name, strand, exons);
+			      return exonsToExonsAndIntrons(name, startCoord, strand, exons);
 			  })
 			 )
 		 );
