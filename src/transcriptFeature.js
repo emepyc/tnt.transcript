@@ -70,6 +70,12 @@ tnt_feature_transcript = function () {
 		.transition()
 		.duration(500)
 		.attr("fill", function (d) {
+		    if (d.coding) {
+			return "#A00000";
+		    }
+		    return track.background_color();
+		})
+		.attr("stroke", function (d) {
 		    return "#A00000";
 		});
 	})
@@ -84,13 +90,13 @@ tnt_feature_transcript = function () {
 		 .orientation("top")
 		);
 
-    var board = tnt_board()
+    var transcriptViewer = tnt_board()
 	.allow_drag(false)
 	.add_track(axis_track);
 
-    var _ = function (div) {
-	board(div);
+    transcriptViewer._start = transcriptViewer.start;
 
+    var start = function () {
 	if (!conf.data && conf.gene) {
     	    var ensemblRest = ensembl();
 	    var gene_url = ensemblRest.url.gene({
@@ -99,50 +105,130 @@ tnt_feature_transcript = function () {
 	    });
 	    ensemblRest.call(gene_url)
 		.then (function (resp) {
-		    console.log(resp);
 		    for (var i=0; i<resp.body.Transcript.length; i++) {
 			var t = resp.body.Transcript[i];
-			var startCoord = t.start < t.end ? t.start : t.end
-			board.add_track(getTranscriptTrack (t.display_name, startCoord, resp.body.strand, t.Exon));
+			transcriptViewer.add_track(getTranscriptTrack(t));
 		    }
-		    board.from(resp.body.start)
+		    transcriptViewer.from(resp.body.start)
 			.to(resp.body.end)
 			.right(resp.body.end)
 			.zoom_out(resp.body.end - resp.body.start);
-		    board.start();
+		    transcriptViewer._start();
 		});
 	}
+	// TODO: This is not working yet. The idea is to be able to pass custom data instead of
+	// relying on ensembl gene transcripts
 	if (conf.data) {
-	    console.log ("Data fully passed, lets try to visualize that (Nothing for now)");
+	    console.warn ("Data fully passed, lets try to visualize that (Nothing for now)");
 	}
     };
+    transcriptViewer.start = start;
 
-    function exonsToExonsAndIntrons (name, startCoord, strand, exons) {
+    function exonsToExonsAndIntrons (exons) {
 	var obj = {};
-	obj.name = [{
-	    pos: startCoord,
-	    name: name,
-	    strand: strand
-	}];
 	obj.exons = exons;
 	obj.introns = [];
-	console.log(exons);
 	for (var i=0; i<exons.length-1; i++) {
 	    var intron = {
-		start : strand === 1 ? exons[i].end : exons[i].start,
-		end   : strand === 1 ? exons[i+1].start : exons[i+1].end
+		start : exons[i].strand === 1 ? exons[i].end : exons[i].start,
+		end   : exons[i].strand === 1 ? exons[i+1].start : exons[i+1].end,
 	    };
 	    obj.introns.push(intron);
 	}
 	return obj;
     }
-    
-    function getTranscriptTrack (name, startCoord, strand, exons) {
 
+    function getTranscriptTrack (transcript) {
+	// Non coding
+	var newExons = [];
+	var translationStart;
+	var translationEnd;
+	if (transcript.Translation !== undefined) {
+	    translationStart = transcript.Translation.start;
+	    translationEnd = transcript.Translation.end;
+	}
+	var exons = transcript.Exon;
+	for (var i=0; i<exons.length; i++) {
+	    if (transcript.Translation === undefined) { // NO coding transcript
+		newExons.push({
+		    start   : exons[i].start,
+		    end     : exons[i].end,
+		    coding  : false
+		});
+	    } else {
+		if (exons[i].start < translationStart) {
+		    // 5'
+		    if (exons[i].end < translationStart) {
+			// Completely non coding
+			newExons.push({
+			    start  : exons[i].start,
+			    end    : exons[i].end,
+			    coding : false
+			});
+		    } else {
+			// Has 5'UTR
+			var ncExon5 = {
+			    start  : exons[i].start,
+			    end    : translationStart,
+			    coding : false
+			};
+			var codingExon5 = {
+			    start  : translationStart,
+			    end    : exons[i].end,
+			    coding : true
+			};
+			if (exons[i].strand === 1) {
+			    newExons.push(ncExon5);
+			    newExons.push(codingExon5);
+			} else {
+			    newExons.push(codingExon5);
+			    newExons.push(ncExon5);
+			}
+		    }
+		} else if (exons[i].end > translationEnd) {
+		    // 3'
+		    if (exons[i].start > translationEnd) {
+			// Completely non coding
+			newExons.push({
+			    start   : exons[i].start,
+			    end     : exons[i].end,
+			    coding  : false
+			});
+		    } else {
+			// Has 3'UTR
+			var codingExon3 = {
+			    start  : exons[i].start,
+			    end    : translationEnd,
+			    coding : true
+			};
+			var ncExon3 = {
+			    start  : translationEnd,
+			    end    : exons[i].end,
+			    coding : false
+			};
+			if (exons[i].strand === 1) {
+			    newExons.push(codingExon3);
+			    newExons.push(ncExon3);
+			} else {
+			    newExons.push(ncExon3);
+			    newExons.push(codingExon3);
+			}
+		    }
+		} else {
+		    // coding exon
+		    newExons.push({
+			start  : exons[i].start,
+			end    : exons[i].end,
+			coding : true
+		    });
+		}
+	    }
+	}
 	var compositeFeature = tnt_board.track.feature.composite()
 	    .add ("exons", exonFeature)
 	    .add ("introns", intronFeature)
 	    .add ("name", nameFeature);
+	
 	return tnt_board.track()
 	    .height(30)
 	    .background_color ("white")
@@ -150,13 +236,19 @@ tnt_feature_transcript = function () {
 	    .data(tnt_board.track.data()
 		  .update(tnt_board.track.data.retriever.sync()
 			  .retriever (function () {
-			      return exonsToExonsAndIntrons(name, startCoord, strand, exons);
+			      var obj = exonsToExonsAndIntrons (newExons);
+			      obj.name = [{
+				  pos: transcript.start,
+				  name: transcript.display_name,
+				  strand: transcript.strand
+			      }];
+			      return obj;
 			  })
 			 )
 		 );
     }
 
-    _.data = function (d) {
+    transcriptViewer.data = function (d) {
 	if (!arguments.length) {
 	    return conf.data;
 	}
@@ -164,7 +256,7 @@ tnt_feature_transcript = function () {
 	return this;
     };
 
-    _.gene = function (g) {
+    transcriptViewer.gene = function (g) {
 	if (!arguments.length) {
 	    return conf.gene;
 	}
@@ -172,7 +264,7 @@ tnt_feature_transcript = function () {
 	return this;
     };
     
-    return _;
+    return transcriptViewer;
 };
 
 module.exports = exports = tnt_feature_transcript;

@@ -8,8 +8,11 @@ var transcriptViewerTheme = function () {
     // console.log(gene_url);
 
     var theme = function (tv, div) {
-	tv.gene("ENSG00000132963")
+	tv
+	    .gene("ENSG00000157764")
+	    .width(1000);
 	tv(div);
+	tv.start();
     };
 
     return theme;
