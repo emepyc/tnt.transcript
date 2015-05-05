@@ -1,86 +1,16 @@
 var tnt_board = require("tnt.board");
 var ensembl = require("tnt.ensembl");
+var transcriptFeature = require("./feature");
 
-tnt_feature_transcript = function () {
+tnt_transcript = function () {
 
     var conf = {
 	data : undefined,
-	gene : undefined
+	gene : undefined,
+	on_click : function () {},
+	on_load : function () {} // executed when the transcript data arrives
     };
     
-    // NAME FEATURE
-    var nameFeature = tnt_board.track.feature()
-	.create (function (name, xScale) {
-	    var track = this;
-	    var baseline = (track.height() / 2) + 5;
-	    name
-		.append("text")
-		.attr("x", function (d) {
-		    return xScale(d.pos);
-		})
-		.attr("y", baseline)
-		.text(function (d) {
-		    var label = d.name;
-		    return d.strand === 1 ? (d.name + ">") : ("<" + d.name);
-		});
-	})
-	.mover (function () {}); // No need to move since the board doens't allow panning or zooming
-    
-    // INTRON FEATURE
-    var intronFeature = tnt_board.track.feature()
-	.create (function (new_elems, xScale) {
-	    var track = this;
-
-	    var featureBottom = (track.height() / 2) * 0.25;
-
-	    new_elems
-		.append("path")
-		.attr("d", function (d) {
-		    var path = "M" + xScale(d.start) + "," + featureBottom +
-			"L" + (xScale(d.start) + (xScale(d.end) - xScale(d.start))/2)  + "," + 0 + 
-			"L" + (xScale(d.end)) + "," + featureBottom;
-		    return path;
-		});
-	})
-	.mover (function () {}); // No need to move since the board doesn't allow panning & zooming
-    
-
-    // EXON FEATURE
-    var exonFeature = tnt_board.track.feature()
-	.index(function (n) {
-	    return n.start;
-	})
-	.create (function (new_elems, xScale) {
-	    var track = this;
-
-	    var featureHeight = (track.height()/2) * 0.5;
-	    var yOffset = (track.height()/2) * 0.25;
-
-	    new_elems
-		.append("rect")
-		.attr("x", function (d) {
-		    return xScale(d.start);
-		})
-		.attr("y", yOffset)
-		.attr("width", function (d) {
-		    return (xScale(d.end) - xScale(d.start));
-		})
-		.attr("height", featureHeight)
-		.attr("fill", track.background_color())
-		.transition()
-		.duration(500)
-		.attr("fill", function (d) {
-		    if (d.coding) {
-			return "#A00000";
-		    }
-		    return track.background_color();
-		})
-		.attr("stroke", function (d) {
-		    return "#A00000";
-		});
-	})
-	.mover (function () {}); // No need to move since the board doesn't allow panning & zooming
-
 
     // tracks
     var axis_track = tnt_board.track()
@@ -109,10 +39,12 @@ tnt_feature_transcript = function () {
 			var t = resp.body.Transcript[i];
 			transcriptViewer.add_track(getTranscriptTrack(t));
 		    }
-		    transcriptViewer.from(resp.body.start)
+		    transcriptViewer
+			.from(resp.body.start)
 			.to(resp.body.end)
 			.right(resp.body.end)
 			.zoom_out(resp.body.end - resp.body.start);
+		    conf.on_load(resp.body.Transcript);
 		    transcriptViewer._start();
 		});
 	}
@@ -124,7 +56,7 @@ tnt_feature_transcript = function () {
     };
     transcriptViewer.start = start;
 
-    function exonsToExonsAndIntrons (exons) {
+    function exonsToExonsAndIntrons (exons, t) {
 	var obj = {};
 	obj.exons = exons;
 	obj.introns = [];
@@ -132,6 +64,7 @@ tnt_feature_transcript = function () {
 	    var intron = {
 		start : exons[i].strand === 1 ? exons[i].end : exons[i].start,
 		end   : exons[i].strand === 1 ? exons[i+1].start : exons[i+1].end,
+		transcript : t
 	    };
 	    obj.introns.push(intron);
 	}
@@ -153,6 +86,7 @@ tnt_feature_transcript = function () {
 		newExons.push({
 		    start   : exons[i].start,
 		    end     : exons[i].end,
+		    transcript : transcript,
 		    coding  : false
 		});
 	    } else {
@@ -163,6 +97,7 @@ tnt_feature_transcript = function () {
 			newExons.push({
 			    start  : exons[i].start,
 			    end    : exons[i].end,
+			    transcript : transcript,
 			    coding : false
 			});
 		    } else {
@@ -170,11 +105,13 @@ tnt_feature_transcript = function () {
 			var ncExon5 = {
 			    start  : exons[i].start,
 			    end    : translationStart,
+			    transcript : transcript,
 			    coding : false
 			};
 			var codingExon5 = {
 			    start  : translationStart,
 			    end    : exons[i].end,
+			    transcript : transcript,
 			    coding : true
 			};
 			if (exons[i].strand === 1) {
@@ -192,6 +129,7 @@ tnt_feature_transcript = function () {
 			newExons.push({
 			    start   : exons[i].start,
 			    end     : exons[i].end,
+			    transcript : transcript,
 			    coding  : false
 			});
 		    } else {
@@ -199,11 +137,13 @@ tnt_feature_transcript = function () {
 			var codingExon3 = {
 			    start  : exons[i].start,
 			    end    : translationEnd,
+			    transcript : transcript,
 			    coding : true
 			};
 			var ncExon3 = {
 			    start  : translationEnd,
 			    end    : exons[i].end,
+			    transcript : transcript,
 			    coding : false
 			};
 			if (exons[i].strand === 1) {
@@ -219,28 +159,28 @@ tnt_feature_transcript = function () {
 		    newExons.push({
 			start  : exons[i].start,
 			end    : exons[i].end,
+			transcript : transcript,
 			coding : true
 		    });
 		}
 	    }
 	}
-	var compositeFeature = tnt_board.track.feature.composite()
-	    .add ("exons", exonFeature)
-	    .add ("introns", intronFeature)
-	    .add ("name", nameFeature);
-	
 	return tnt_board.track()
 	    .height(30)
 	    .background_color ("white")
-	    .display(compositeFeature)
+	    .display(transcriptFeature()
+		     //.foreground_color("#A00000")
+		     .on_click(conf.on_click)
+		    )
 	    .data(tnt_board.track.data()
 		  .update(tnt_board.track.data.retriever.sync()
 			  .retriever (function () {
-			      var obj = exonsToExonsAndIntrons (newExons);
+			      var obj = exonsToExonsAndIntrons (newExons, transcript);
 			      obj.name = [{
 				  pos: transcript.start,
 				  name: transcript.display_name,
-				  strand: transcript.strand
+				  strand: transcript.strand,
+				  transcript: transcript
 			      }];
 			      return obj;
 			  })
@@ -248,6 +188,14 @@ tnt_feature_transcript = function () {
 		 );
     }
 
+    transcriptViewer.on_click = function (cbak) {
+	if (!arguments.length) {
+	    return conf.on_click;
+	}
+	conf.on_click = cbak;
+	return this;
+    };
+    
     transcriptViewer.data = function (d) {
 	if (!arguments.length) {
 	    return conf.data;
@@ -263,8 +211,16 @@ tnt_feature_transcript = function () {
 	conf.gene = g;
 	return this;
     };
-    
+
+    transcriptViewer.on_load = function (cbak) {
+	if (!arguments.length) {
+	    return conf.cbak;
+	}
+	conf.on_load = cbak;
+	return this;
+    };
+   
     return transcriptViewer;
 };
 
-module.exports = exports = tnt_feature_transcript;
+module.exports = exports = tnt_transcript;

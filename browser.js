@@ -6,3 +6,4 @@ if (typeof tnt === "undefined") {
 // tnt.tooltip = require("tnt.tooltip");
 
 tnt.transcript = require("./index.js");
+tnt.tooltip = require("tnt.tooltip");
