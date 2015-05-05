@@ -62,8 +62,8 @@ tnt_transcript = function () {
 	obj.introns = [];
 	for (var i=0; i<exons.length-1; i++) {
 	    var intron = {
-		start : exons[i].strand === 1 ? exons[i].end : exons[i].start,
-		end   : exons[i].strand === 1 ? exons[i+1].start : exons[i+1].end,
+		start : exons[i].transcript.strand === 1 ? exons[i].end : exons[i].start,
+		end   : exons[i].transcript.strand === 1 ? exons[i+1].start : exons[i+1].end,
 		transcript : t
 	    };
 	    obj.introns.push(intron);

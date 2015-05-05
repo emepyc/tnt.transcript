@@ -63,7 +63,6 @@ var tnt_feature_transcript = function () {
 		    return (xScale(d.end) - xScale(d.start));
 		})
 	        .attr("height", featureHeight)
-	        .attr("fill", track.background_color())
 	        .transition()
 	        .duration(500)
 	        .attr("fill", function (d) {
