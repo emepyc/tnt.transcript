@@ -66,10 +66,10 @@ var tnt_feature_transcript = function () {
 	        .transition()
 	        .duration(500)
 	        .attr("fill", function (d) {
-		    if (!d.coding) {
-			return track.background_color();
+		    if (d.coding) {
+			return exonFeature.foreground_color();
 		    }
-		    //return track.background_color();
+		    return track.background_color();
 		})
 	        .attr("stroke", exonFeature.foreground_color());
 	})
