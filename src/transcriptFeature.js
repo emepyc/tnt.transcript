@@ -7,7 +7,6 @@ tnt_transcript = function () {
     var conf = {
 	data : undefined,
 	gene : undefined,
-	on_click : function () {},
 	on_load : function () {} // executed when the transcript data arrives
     };
     
@@ -168,10 +167,7 @@ tnt_transcript = function () {
 	return tnt_board.track()
 	    .height(30)
 	    .background_color ("white")
-	    .display(transcriptFeature()
-		     //.foreground_color("#A00000")
-		     .on_click(conf.on_click)
-		    )
+	    .display(transcriptFeature())
 	    .data(tnt_board.track.data()
 		  .update(tnt_board.track.data.retriever.sync()
 			  .retriever (function () {
@@ -187,14 +183,6 @@ tnt_transcript = function () {
 			 )
 		 );
     }
-
-    transcriptViewer.on_click = function (cbak) {
-	if (!arguments.length) {
-	    return conf.on_click;
-	}
-	conf.on_click = cbak;
-	return this;
-    };
     
     transcriptViewer.data = function (d) {
 	if (!arguments.length) {
