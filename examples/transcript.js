@@ -70,24 +70,28 @@ var transcriptViewerTheme = function () {
 	    biotypes_legend
 		.append("text")
 		.text(function (d) {return d});
-
 	    // Re-color all the transcript!
 	};
 
 	tv
 	    .gene("ENSG00000157764")
 	    .width(1000)
+	    .extend_canvas({
+		left : 20,
+		right: 20
+	    })
 	    .on_load (function (t) {
 		var tracks = tv.tracks();
-		for (var i=1; i<tracks.length; i++) {
+		for (var i=2; i<tracks.length; i++) { // the first two tracks are axis and sequence
 		    var composite = tracks[i].display();
 		    var displays = composite.displays();
 		    for (var j=0; j<displays.length; j++) {
 			displays[j]
-			    .foreground_color(colors[t[i-1].biotype] || "black")
+			    .foreground_color(colors[t[i-2].biotype] || "black")
 			    .on_click(tooltip);
 		    }
 		}
+		console.log("create legend...");
 		createLegend(t);
 	    });
 	tv(div);

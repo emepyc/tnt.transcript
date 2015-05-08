@@ -20,7 +20,14 @@ var tnt_feature_transcript = function () {
 		    return d.strand === 1 ? (d.name + ">") : ("<" + d.name);
 		});
 	})
-	.mover (function () {}); // No need to move since the board doens't allow panning or zooming
+	.mover (function (name, xScale) {
+	    name
+		.select("text")
+		.attr("x", function (d) {
+		    return xScale(d.pos);
+		})
+	});
+	//.mover (function () {}); // No need to move since the board doens't allow panning or zooming
 
     // INTRON FEATURE
     var intronFeature = tnt_board.track.feature()
@@ -40,7 +47,19 @@ var tnt_feature_transcript = function () {
 		    return path;
 		});
 	})
-        .mover (function () {}); // No need to move since the board doesn't allow panning & zooming
+	.mover (function (intron, xScale) {
+	    var track = this;
+	    var featureBottom = (track.height() / 2) * 0.25;
+	    intron
+		.select("path")
+		.attr("d", function (d) {
+		    var path = "M" + xScale(d.start) + "," + featureBottom +
+			"L" + (xScale(d.start) + (xScale(d.end) - xScale(d.start))/2)  + "," + 0 +
+			"L" + (xScale(d.end)) + "," + featureBottom;
+		    return path;
+		});
+	});
+        //.mover (function () {}); // No need to move since the board doesn't allow panning & zooming
 
     // EXON FEATURE
     var exonFeature = tnt_board.track.feature()
@@ -73,7 +92,17 @@ var tnt_feature_transcript = function () {
 		})
 	        .attr("stroke", exonFeature.foreground_color());
 	})
-        .mover (function () {}); // No need to move since the board doesn't allow panning & zooming
+	.mover (function (exon, xScale) {
+	    exon
+		.select("rect")
+		.attr("x", function (d) {
+		    return xScale(d.start);
+		})
+		.attr("width", function (d) {
+		    return (xScale(d.end) - xScale(d.start));
+		});
+	});
+        //.mover (function () {}); // No need to move since the board doesn't allow panning & zooming
 
     // COMPOSITE FEATURE
     var compositeFeature = tnt_board.track.feature.composite()

@@ -19,9 +19,28 @@ tnt_transcript = function () {
 		 .orientation("top")
 		);
 
+    var seq_track = tnt_board.track()
+	.height(20)
+	.background_color("white")
+	.display(tnt_board.track.feature.sequence()
+		 .sequence (function (d) {
+		     return d.nt;
+		 }))
+	.data(tnt_board.track.data()
+	      .update(tnt_board.track.data.retriever.sync()
+		     .retriever (function () {
+			 return [{
+			     pos: 140740000,
+			     nt : 'T'
+			 }];
+		     })
+		    )
+	     );
+    
     var transcriptViewer = tnt_board()
-	.allow_drag(false)
-	.add_track(axis_track);
+	.allow_drag(true)
+	.add_track(axis_track)
+    	.add_track(seq_track);
 
     transcriptViewer._start = transcriptViewer.start;
 
@@ -42,6 +61,7 @@ tnt_transcript = function () {
 			.from(resp.body.start)
 			.to(resp.body.end)
 			.right(resp.body.end)
+			.left(resp.body.start)
 			.zoom_out(resp.body.end - resp.body.start);
 		    conf.on_load(resp.body.Transcript);
 		    transcriptViewer._start();
