@@ -25,7 +25,7 @@ var tnt_feature_transcript = function () {
 		.select("text")
 		.attr("x", function (d) {
 		    return xScale(d.pos);
-		})
+		});
 	});
 	//.mover (function () {}); // No need to move since the board doens't allow panning or zooming
 
