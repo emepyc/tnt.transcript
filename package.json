@@ -1,6 +1,6 @@
 {
   "name": "tnt.transcript",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Transcript Viewer based on TnT board and Ensembl data",
   "main": "index.js",
   "directories": {
