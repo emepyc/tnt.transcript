@@ -3,3 +3,6 @@
 	- Added move to transcript features
 0.0.5
 	- tnt.ensembl is exposed in the exported object
+0.0.6
+	- Updated tnt.tooltip (v0.0.9)
+	- 'start' method accepts an optional loc to jump to a given location
