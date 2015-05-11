@@ -25,7 +25,14 @@ tnt_transcript = function () {
 
     transcriptViewer._start = transcriptViewer.start;
 
-    var start = function () {
+    var start = function (loc) {
+	if (loc && loc.from && loc.to) {
+	    transcriptViewer
+		.from(loc.from)
+		.to(loc.to);
+	    transcriptViewer._start();
+	    return;
+	}
 	if (!conf.data && conf.gene) {
     	    var ensemblRest = ensembl();
 	    var gene_url = ensemblRest.url.gene({

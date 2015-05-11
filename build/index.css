@@ -17,6 +17,9 @@
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1e5799', endColorstr='#7db9e8',GradientType=1 );
   /* IE6-9 */ }
 
+.tnt_zmenu_inner_header {
+  color: "cyan"; }
+
 .tnt_elem_introns {
   fill: none;
   /* stroke : #A00000; */ }
