@@ -13,12 +13,16 @@ var tnt_feature_transcript = function () {
 		})
 		.attr("y", baseline)
 		.attr("fill", function (d) {
-		    return nameFeature.foreground_color();
+		    console.log("here");
+		    return track.background_color();
 		})
 		.text(function (d) {
 		    var label = d.name;
 		    return d.strand === 1 ? (d.name + ">") : ("<" + d.name);
-		});
+		})
+		.transition()
+		.duration(500)
+		.attr("fill", nameFeature.foreground_color());
 	})
 	.mover (function (name, xScale) {
 	    name
@@ -38,14 +42,17 @@ var tnt_feature_transcript = function () {
 
 	    new_elems
 	        .append("path")
-		.attr("stroke", intronFeature.foreground_color())
+		.attr("stroke", track.background_color())
 		.attr("stroke-width", "1px")
 	        .attr("d", function (d) {
 		    var path = "M" + xScale(d.start) + "," + featureBottom +
 			"L" + (xScale(d.start) + (xScale(d.end) - xScale(d.start))/2)  + "," + 0 +
 			"L" + (xScale(d.end)) + "," + featureBottom;
 		    return path;
-		});
+		})
+		.transition()
+		.duration(500)
+		.attr("stroke", intronFeature.foreground_color());
 	})
 	.mover (function (intron, xScale) {
 	    var track = this;
@@ -82,6 +89,8 @@ var tnt_feature_transcript = function () {
 		    return (xScale(d.end) - xScale(d.start));
 		})
 	        .attr("height", featureHeight)
+		.attr("fill", track.background_color())
+		.attr("stroke", track.background_color())
 	        .transition()
 	        .duration(500)
 	        .attr("fill", function (d) {

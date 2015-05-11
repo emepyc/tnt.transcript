@@ -6,3 +6,5 @@
 0.0.6
 	- Updated tnt.tooltip (v0.0.9)
 	- 'start' method accepts an optional loc to jump to a given location
+0.0.7
+	- fade-in of new elements
