@@ -1,4 +1,4 @@
-var tnt_board = require("tnt.board");
+var tnt_board = require("tnt.genome");
 var ensembl = require("tnt.ensembl");
 var transcriptFeature = require("./feature");
 
@@ -18,10 +18,10 @@ tnt_transcript = function () {
 	.display(tnt_board.track.feature.axis()
 		 .orientation("top")
 		);
-    
+
     var transcriptViewer = tnt_board()
 	.allow_drag(true)
-	.add_track(axis_track)
+	.add_track(axis_track);
 
     transcriptViewer._start = transcriptViewer.start;
 

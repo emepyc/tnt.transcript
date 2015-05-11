@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "tnt.board": "0.0.7",
-    "tnt.ensembl": "^0.0.2",
+    "tnt.ensembl": "^0.0.3",
     "tnt.genome": "^0.0.5",
     "tnt.tooltip": "^0.0.6",
     "tnt.utils": "^0.0.0"

@@ -1,3 +1,5 @@
 0.0.4
 	- Removed on_click on tnt.transcript (see the examples for a way to fire 'on click' events in the feature)
 	- Added move to transcript features
+0.0.5
+	- tnt.ensembl is exposed in the exported object
