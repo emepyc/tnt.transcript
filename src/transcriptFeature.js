@@ -13,7 +13,7 @@ tnt_transcript = function () {
 
     // tracks
     var axis_track = tnt_board.track()
-	.height(20)
+	.height(0)
 	.background_color("white")
 	.display(tnt_board.track.feature.axis()
 		 .orientation("top")

@@ -8,3 +8,6 @@
 	- 'start' method accepts an optional loc to jump to a given location
 0.0.7
 	- fade-in of new elements
+0.0.8
+        - Updated dependencies (tnt.board @ 0.0.8)
+	- Adjustment of axis track

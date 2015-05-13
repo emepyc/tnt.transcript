@@ -47,7 +47,7 @@
     "watchify": "^1.0.2"
   },
   "dependencies": {
-    "tnt.board": "0.0.7",
+    "tnt.board": "^0.0.8",
     "tnt.ensembl": "^0.0.3",
     "tnt.genome": "^0.0.5",
     "tnt.tooltip": "^0.0.9",
