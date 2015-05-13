@@ -2,7 +2,7 @@ var tnt_board = require("tnt.genome");
 var ensembl = require("tnt.ensembl");
 var transcriptFeature = require("./feature");
 
-tnt_transcript = function () {
+var tnt_transcript = function () {
 
     var conf = {
 	data : undefined,

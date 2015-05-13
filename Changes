@@ -11,3 +11,5 @@
 0.0.8
         - Updated dependencies (tnt.board @ 0.0.8)
 	- Adjustment of axis track
+0.0.9
+	- Updated .gitignore and .npmignore with build folder

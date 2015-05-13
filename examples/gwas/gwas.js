@@ -125,11 +125,9 @@ var gwasViewerTheme = function () {
 			    .on_click(tooltip);
 		    }
 		}
-		console.log("create legend...");
 		createLegend(t);
 	    });
 	tv(div);
-	console.log("ok");
 	tv.start();
 
     };
