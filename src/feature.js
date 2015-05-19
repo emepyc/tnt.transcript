@@ -13,7 +13,6 @@ var tnt_feature_transcript = function () {
 		})
 		.attr("y", baseline)
 		.attr("fill", function (d) {
-		    console.log("here");
 		    return track.background_color();
 		})
 		.text(function (d) {
